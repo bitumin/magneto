@@ -1,0 +1,24 @@
+{
+  "name": "magneto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitumin/magneto.git"
+  },
+  "keywords": [
+    "magnet",
+    "torrent",
+    "search"
+  ],
+  "author": "Mitxel Moriana",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bitumin/magneto/issues"
+  },
+  "homepage": "https://github.com/bitumin/magneto#readme"
+}
