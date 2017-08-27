@@ -2,9 +2,9 @@
   "name": "magneto",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.js",
   "scripts": {
-    "build": "node build.js",
+    "release": "node build-release.js",
+    "build": "node build-dev.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/bitumin/magneto/issues"
   },
-  "homepage": "https://github.com/bitumin/magneto#readme"
+  "homepage": "https://github.com/bitumin/magneto#readme",
+  "devDependencies": {
+    "nw-builder": "^3.4.1"
+  }
 }

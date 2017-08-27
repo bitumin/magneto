@@ -1,0 +1,13 @@
+{
+  "name": "magneto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [
+    "magnet",
+    "torrent",
+    "search"
+  ],
+  "author": "Mitxel Moriana",
+  "license": "ISC"
+}
