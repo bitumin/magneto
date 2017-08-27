@@ -1,0 +1,26 @@
+{
+  "name": "magneto",
+  "description": "Magneto App",
+  "main": "index.html",
+  "authors": [
+    "Mitxel Moriana"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "magnet",
+    "torrent",
+    "search"
+  ],
+  "homepage": "https://github.com/bitumin/magneto",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "framework7": "^1.6.4"
+  }
+}
