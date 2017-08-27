@@ -1,13 +1,18 @@
 {
   "name": "magneto",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Magneto App",
+  "main": "main.js",
   "keywords": [
     "magnet",
     "torrent",
     "search"
   ],
   "author": "Mitxel Moriana",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express"    : "latest",
+    "request"    : "latest",
+    "cheerio"    : "latest"
+  }
 }
