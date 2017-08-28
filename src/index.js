@@ -19,8 +19,8 @@ magneto.preloading.log = function (txt) {
 };
 magneto.preloading.fatal = function (txt) {
     $$('.preloading-block').hide();
-    $$('.results-block').append($$(
-        '<p>Fatal error: ' + txt + '</p>' +
+    $$('.content-block').append($$(
+        '<p>Magnets not found: ' + txt + '</p>' +
         '<p><a href="#" class="back">Back to Search</a></p>'
     ));
 };
@@ -100,7 +100,7 @@ $$('.form-to-data').on('click', function () {
         magneto.preloading.log('Requesting new proxies list...');
         request('https://proxybay.github.io/', function (error, response, body) {
             if (error) {
-                magneto.preloading.fatal(error);
+                magneto.preloading.fatal('Proxy index seems to be down. Try again later.');
                 return;
             }
             magneto.preloading.log('Saving proxies list...');
@@ -113,7 +113,7 @@ $$('.form-to-data').on('click', function () {
             });
             console.log('List of fetched proxies: ', tpbProxies);
             if (!tpbProxies.length) {
-                magneto.preloading.fatal('No valid proxies seems to be up and running. Try again later.');
+                magneto.preloading.fatal('No proxies seems to be up and running. Try again later.');
                 return;
             }
 
@@ -158,15 +158,24 @@ function closeAllConnections() {
     resetAllConnections();
 }
 
+function invalidResponse(searchQuery) {
+    if (++errorResponses >= tpbProxies.length) {
+        magneto.preloading.fatal('None of the proxies returned a valid list of magnets with the keywords "' + searchQuery + '". Try again later or try another search.');
+        resetAllConnections();
+    }
+}
+
 function requestListOfMagnets(proxy, connectionNumber, searchQuery) {
-    return request(proxy + '/search/' + encodeURI(searchQuery) + '/0/99/0', function (error, response, body) {
+    var requestOptions = {
+        method: 'GET',
+        url: proxy + '/search/' + encodeURI(searchQuery) + '/0/99/0',
+        timeout: 30000
+    };
+    return request(requestOptions, function (error, response, body) {
         openConnections.splice(connectionNumber, 1);
         if (error) {
-            magneto.preloading.log('Proxy ' + proxy + 'returned an error response: ' + error);
-            if (++errorResponses >= tpbProxies.length) {
-                magneto.preloading.fatal('None of the proxies returned a valid response. Try again later.');
-                resetAllConnections();
-            }
+            console.log('Proxy ' + proxy + 'returned an error response (' + error + ')');
+            invalidResponse(searchQuery);
             return;
         }
 
@@ -176,10 +185,11 @@ function requestListOfMagnets(proxy, connectionNumber, searchQuery) {
         var resultsTrList = $('#searchResult').find('tbody > tr');
         if (!resultsTrList.length) {
             console.log('Response from ' + proxy + ' seems to not be valid. Ignoring response.');
+            invalidResponse(searchQuery);
             return;
         }
 
-        // Avoid race conditions
+        // Prevent requests race condition
         if (++validatedResponses > 1) {
             return;
         }
