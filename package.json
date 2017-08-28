@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "release": "cd src && bower install && npm install && cd .. && node build-release.js",
+    "release": "cd src && bower install && npm install && cd .. && node build-release.js && bash package.sh",
     "build": "cd src && bower install && npm install && cd .. && node build-dev.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,5 +25,6 @@
   "devDependencies": {
     "nw-builder": "^3.4.1",
     "winresourcer": "^0.9.0"
-  }
+  },
+  "dependencies": {}
 }

@@ -11,7 +11,7 @@ var nw = new NwBuilder({
 nw.on('log',  console.log);
 
 nw.build().then(function () {
-    console.log('all done!');
+    console.log('Dev build done!');
 }).catch(function (error) {
     console.error(error);
 });

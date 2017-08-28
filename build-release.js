@@ -1,4 +1,5 @@
 var NwBuilder = require('nw-builder');
+// var manifest = require('./src/package.json');
 
 var nw = new NwBuilder({
     files: './src/**/**',
@@ -12,7 +13,7 @@ var nw = new NwBuilder({
 nw.on('log', console.log);
 
 nw.build().then(function () {
-    console.log('all done!');
+    console.log('Build done!');
 }).catch(function (error) {
     console.error(error);
 });
