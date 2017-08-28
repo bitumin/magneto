@@ -16,6 +16,10 @@
     "torrent",
     "search"
   ],
+  "window": {
+    "title": "Magneto App",
+    "icon": "magneto.png"
+  },
   "author": "Mitxel Moriana",
   "license": "ISC",
   "bugs": {
@@ -23,6 +27,7 @@
   },
   "homepage": "https://github.com/bitumin/magneto#readme",
   "devDependencies": {
-    "nw-builder": "^3.4.1"
+    "nw-builder": "^3.4.1",
+    "winresourcer": "^0.9.0"
   }
 }

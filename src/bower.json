@@ -21,6 +21,8 @@
     "tests"
   ],
   "dependencies": {
-    "framework7": "^1.6.4"
+    "framework7": "^1.6.4",
+    "animate.css": "^3.5.2",
+    "components-font-awesome": "^4.7.0"
   }
 }

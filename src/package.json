@@ -14,5 +14,9 @@
     "express"    : "latest",
     "request"    : "latest",
     "cheerio"    : "latest"
+  },
+  "window": {
+    "title": "Magneto App",
+    "icon": "magneto.png"
   }
 }
