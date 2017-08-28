@@ -16,10 +16,6 @@
     "torrent",
     "search"
   ],
-  "window": {
-    "title": "Magneto App",
-    "icon": "magneto.png"
-  },
   "author": "Mitxel Moriana",
   "license": "ISC",
   "bugs": {

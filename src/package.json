@@ -2,7 +2,7 @@
   "name": "magneto",
   "version": "1.0.0",
   "description": "Magneto App",
-  "main": "main.js",
+  "main": "index.html",
   "keywords": [
     "magnet",
     "torrent",
@@ -11,12 +11,17 @@
   "author": "Mitxel Moriana",
   "license": "ISC",
   "dependencies": {
-    "express"    : "latest",
-    "request"    : "latest",
-    "cheerio"    : "latest"
+    "express": "latest",
+    "request": "latest",
+    "cheerio": "latest"
   },
   "window": {
     "title": "Magneto App",
-    "icon": "magneto.png"
+    "icon": "magneto.png",
+    "position": "center",
+    "min_width": 800,
+    "min_height": 600,
+    "width": 800,
+    "height": 600
   }
 }
