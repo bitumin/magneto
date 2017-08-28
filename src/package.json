@@ -11,9 +11,8 @@
   "author": "Mitxel Moriana",
   "license": "ISC",
   "dependencies": {
-    "express": "latest",
-    "request": "latest",
-    "cheerio": "latest"
+    "cheerio": "latest",
+    "request": "latest"
   },
   "window": {
     "title": "Magneto App",
