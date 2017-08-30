@@ -6,6 +6,7 @@ var nw = new NwBuilder({
     buildDir: './build/release',
     winIco: './src/magneto.ico',
     macIcns: './src/magneto.icns',
+    macCredits: './src/Credits.html',
     platforms: ['linux', 'osx64', 'win'],
     flavor: 'normal',
     version: 'latest'
