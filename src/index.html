@@ -50,6 +50,55 @@
         </div>
     </div>
 </div>
+<!--templates-->
+<script type="text/template" id="results">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="back link">
+                    <i class="icon icon-back"></i>
+                    <span>Back to Search</span></a>
+            </div>
+            <div class="center sliding">Magnets</div>
+        </div>
+    </div>
+    <div class="pages">
+        <div data-page="dynamic-pages" class="page">
+            <div class="page-content">
+                <div class="content-block results">
+                    <div class="preloading-block row">
+                        <div class="col-100">
+                            <span class="preloader"></span>
+                        </div>
+                        <br>
+                        <div class="col-100 preloading-log"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/template" id="results-table">
+<div class="content-block-inner results">
+    <div class="data-table data-table-init card">
+        <table>
+            <thead>
+                <tr>
+                    <th data-column="1">Magnet</th>
+                    <th data-column="2" class="label-cell sortable-cell">Name</th>
+                    <th data-column="3">Uploaded</th>
+                    <th data-column="4">Size</th>
+                    <th data-column="5" class="sortable-cell">Uploaded by</th>
+                    <th data-column="6" class="numeric-cell sortable-cell sortable-active">Seeders</th>
+                    <th data-column="7" class="numeric-cell sortable-cell">Leechers</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+</script>
+<!--/templates-->
 <script src="bower_components/framework7/dist/js/framework7.min.js"></script>
 <script src="index.js"></script>
 </body>

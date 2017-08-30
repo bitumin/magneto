@@ -1,13 +1,91 @@
-// var express = require('express');
-// var fs = require('fs');
 var request = require('request');
+var _ = require('underscore');
+var magnetUri = require('magnet-uri');
 var cheerio = require('cheerio');
 var clipboard = nw.Clipboard.get();
+var validUrl = require('valid-url');
 
-// App utilities
-var magneto = {};
-magneto.preloading = {};
-magneto.preloading.log = function (txt) {
+// Initialize Framework7 UI
+var myApp = new Framework7();
+var $$ = Dom7;
+
+// Load main view
+var mainView = myApp.addView('.view-main', {
+    dynamicNavbar: true
+});
+
+// Search click handler
+$$('.form-to-data').on('click', function () {
+    // Fetch user search query
+    var formData = myApp.formToData('#my-form');
+    var searchQuery = formData.search;
+
+    // Go to results page
+    mainView.router.loadContent($$('#results').html());
+
+    // check if we already have fetched a list of tpb proxies
+    Mgt.search(searchQuery);
+});
+
+// App namespace
+var Mgt = {};
+
+// Load local cache of sources
+Mgt.sources = require('./sources.json');
+console.info('Loaded local list of sources', Mgt.sources);
+
+// Dynamic source aggregation methods
+Mgt.sourceAggregator = {};
+Mgt.sourceAggregator.tpb = function () {
+    var tpbProxiesUrl = 'https://proxybay.github.io/';
+
+    console.info('Retrieving fresh TPB sources...');
+    request(tpbProxiesUrl, function (error, response, body) {
+        if (error) {
+            console.error(tpbProxiesUrl + ' seems to be down.');
+            return;
+        }
+
+        var freshTpbProxies = [];
+        var $ = cheerio.load(body);
+        $('table[id="searchResult"]').find('tr').each(function (i, el) {
+            var tr = $(el);
+            if (tr.find('td.status > img').attr('alt') === 'up') {
+                var freshProxyUrl = tr.find('td.site > a[href^="http"]').attr('href');
+                if (
+                    typeof freshProxyUrl === 'string'
+                    && freshProxyUrl.length
+                    && validUrl.isWebUri(freshProxyUrl)
+                ) {
+                    freshTpbProxies.push({
+                        "url": freshProxyUrl,
+                        "type": "tpb"
+                    });
+                }
+            }
+        });
+
+        console.info('List of fresh TPB proxies: ', freshTpbProxies);
+
+        // Merge fresh proxies with already loaded ones (remove duplicated proxies by url property)
+        if (freshTpbProxies.length > 0) {
+            console.info('Adding ' + freshTpbProxies.length + ' fresh TPB proxies to sources list');
+            Mgt.sources = _.uniq(_.union(Mgt.sources, freshTpbProxies), false, function (proxy) {
+                return proxy.url;
+            });
+        }
+    });
+};
+Mgt.sourceAggregator.init = function () {
+    console.info('Initializing dynamic sources aggregators');
+    Mgt.sourceAggregator.tpb();
+    // todo: add more dynamic aggregators
+};
+Mgt.sourceAggregator.init();
+
+// Loading utils
+Mgt.preloader = {};
+Mgt.preloader.log = function (txt) {
     var logTarget = $$('.preloading-log');
     logTarget.children().each(function (i, el) {
         var logEl = $$(el);
@@ -17,190 +95,158 @@ magneto.preloading.log = function (txt) {
     });
     logTarget.prepend('<div>' + txt + '</div>');
 };
-magneto.preloading.fatal = function (txt) {
+Mgt.preloader.fatal = function (txt) {
     $$('.preloading-block').hide();
-    $$('.content-block').append($$(
+    $$('.content-block.results').append($$(
         '<p>Magnets not found: ' + txt + '</p>' +
         '<p><a href="#" class="back">Back to Search</a></p>'
     ));
 };
-magneto.preloading.done = function () {
+Mgt.preloader.isDone = false;
+Mgt.preloader.done = function () {
     $$('.preloading-block').hide();
-    $$('.content-block').append($$(
-        '<div class="content-block-inner results">' +
-        '  <div class="data-table card">' +
-        '    <table>' +
-        '      <thead>' +
-        '        <tr>' +
-        '          <th>Magnet</th>' +
-        '          <th class="label-cell">Name</th>' +
-        '          <th>Uploaded</th>' +
-        '          <th>Size</th>' +
-        '          <th>Uploaded by</th>' +
-        '          <th class="numeric-cell">Seeders</th>' +
-        '          <th class="numeric-cell">Leechers</th>' +
-        '        </tr>' +
-        '      </thead>' +
-        '      <tbody>' +
-        '      </tbody>' +
-        '    </table>' +
-        '  </div>' +
-        '</div>'
-    ));
-};
-magneto.preloading.loadResult = function (magnet, name, uploaded, size, uploadedBy, seeders, leechers) {
-    $$('.content-block-inner.results').find('tbody').append($$(
-        '<tr>' +
-        '  <td><a href="#" onclick="copyToClipboard(\'' + magnet + '\', \'' + name + '\');"><i class="fa fa-magnet"></i></a></td>' +
-        '  <td class="label-cell">' + name + '</td>' +
-        '  <td>' + uploaded + '</td>' +
-        '  <td>' + size + '</td>' +
-        '  <td>' + uploadedBy + '</td>' +
-        '  <td class="numeric-cell">' + seeders + '</td>' +
-        '  <td class="numeric-cell">' + leechers + '</td>' +
-        '</tr>'
-    ));
-};
-
-// Initialize Framework7 UI
-var myApp = new Framework7();
-var $$ = Dom7;
-var mainView = myApp.addView('.view-main', {
-    dynamicNavbar: true
-});
-
-var tpbProxies = [];
-var openConnections = [];
-var errorResponses = 0;
-var validatedResponses = 0;
-
-function startQueryingForMagnets(searchQuery) {
-    magneto.preloading.log('Querying for magnets...');
-
-    validatedResponses = 0;
-    for (var i = 0; i < tpbProxies.length; i++) {
-        openConnections[i] = requestListOfMagnets(tpbProxies[i], i, searchQuery);
-    }
-}
-
-$$('.form-to-data').on('click', function () {
-
-    // Fetch user search query
-    var formData = myApp.formToData('#my-form');
-    var searchQuery = formData.search;
-
-    // Preload results page
-    createResultsPage();
-
-    // check if we already have fetched a list of tpb proxies
-    magneto.preloading.log('Retrieving proxies list...');
-    if (tpbProxies.length) {
-        startQueryingForMagnets(searchQuery);
-    } else {
-        magneto.preloading.log('Requesting new proxies list...');
-        request('https://proxybay.github.io/', function (error, response, body) {
-            if (error) {
-                magneto.preloading.fatal('Proxy index seems to be down. Try again later.');
-                return;
-            }
-            magneto.preloading.log('Saving proxies list...');
-            var $ = cheerio.load(body);
-            $('table[id="searchResult"]').find('tr').each(function (i, el) {
-                var tr = $(el);
-                if (tr.find('td.status > img').attr('alt') === 'up') {
-                    tpbProxies.push(tr.find('td.site > a[href^="http"]').attr('href'));
-                }
-            });
-            console.log('List of fetched proxies: ', tpbProxies);
-            if (!tpbProxies.length) {
-                magneto.preloading.fatal('No proxies seems to be up and running. Try again later.');
-                return;
-            }
-
-            startQueryingForMagnets(searchQuery);
+    $$('.content-block.results')
+        .append($$('#results-table').html())
+        .on('click', 'a.magnet', function () {
+            clipboard.set($$(this).data('magnet'), 'text');
+            myApp.alert('Magnet link for "' + $$(this).data('name') + '" copied to your system clipboard', 'Great success!');
+        })
+        .on('click', 'th.sortable-cell', function () {
+            // Switch active class
+            var th = $$(this);
+            th.siblings().removeClass('sortable-active');
+            th.addClass('sortable-active');
+            // Sort
+            var column = th.data('column');
+            Mgt.results.sort(column);
         });
+};
+
+// Results handlers
+Mgt.results = {};
+Mgt.results.added = [];
+Mgt.results.add = function (magnet, name, uploaded, size, uploadedBy, seeders, leechers) {
+    // Validate magnet before adding
+    if (typeof magnet !== 'string' || !magnet.length) {
+        return;
     }
-});
 
-function createResultsPage() {
-    mainView.router.loadContent(
-        '<div class="navbar">' +
-        '  <div class="navbar-inner">' +
-        '    <div class="left"><a href="#" class="back link"><i class="icon icon-back"></i><span>Back to Search</span></a></div>' +
-        '    <div class="center sliding">Magnets</div>' +
-        '  </div>' +
-        '</div>' +
-        '<div class="pages">' +
-        '  <div data-page="dynamic-pages" class="page">' +
-        '    <div class="page-content">' +
-        '      <div class="content-block">' +
-        '        <div class="preloading-block">' +
-        '          <div class="col-100"><span class="preloader"></span></div>' +
-        '          <br>' +
-        '          <div class="col-100 preloading-log"></div>' +
-        '        </div>' +
-        '      </div>' +
-        '    </div>' +
-        '  </div>' +
-        '</div>'
-    );
-}
-
-function resetAllConnections() {
-    openConnections = [];
-    errorResponses = 0;
-}
-
-function closeAllConnections() {
-    for (var i = 0; i < openConnections.length; i++) {
-        openConnections[i].abort();
+    try {
+        var parsedMagnet = magnetUri.decode(magnet);
+    } catch (err) {
+        console.warn('Error while trying to decode magnet link information:' + magnet);
+        return;
     }
-    resetAllConnections();
-}
 
-function invalidResponse(searchQuery) {
-    if (++errorResponses >= tpbProxies.length) {
-        magneto.preloading.fatal('None of the proxies returned a valid list of magnets with the keywords "' + searchQuery + '". Try again later or try another search.');
-        resetAllConnections();
+    if (typeof parsedMagnet === 'undefined' || typeof parsedMagnet.xt !== 'string' || !parsedMagnet.xt.length) {
+        return;
     }
-}
 
-function requestListOfMagnets(proxy, connectionNumber, searchQuery) {
-    var requestOptions = {
-        method: 'GET',
-        url: proxy + '/search/' + encodeURI(searchQuery) + '/0/99/0',
-        timeout: 30000
-    };
-    return request(requestOptions, function (error, response, body) {
-        openConnections.splice(connectionNumber, 1);
+    // Ensure this magnet has not been already added to the results list
+    if (_.contains(Mgt.results.added, parsedMagnet.xt)) {
+        return;
+    }
+
+    // Finish preloading process
+    if (!Mgt.preloader.isDone) {
+        Mgt.preloader.done();
+        Mgt.preloader.isDone = true;
+    }
+
+    // Store magnet xt as added result
+    Mgt.results.added.push(magnet.xt);
+
+    $$('.content-block-inner.results')
+        .find('tbody')
+        .append($$(
+            '<tr>' +
+            '    <td>' +
+            '        <a class="magnet" href="#" data-magnet="' + magnet + '" data-name="' + name + '">' +
+            '            <i class="fa fa-magnet"></i>' +
+            '        </a>' +
+            '    </td>' +
+            '    <td class="label-cell">' + name + '</td>' +
+            '    <td>' + uploaded + '</td>' +
+            '    <td>' + size + '</td>' +
+            '    <td>' + uploadedBy + '</td>' +
+            '    <td class="numeric-cell">' + seeders + '</td>' +
+            '    <td class="numeric-cell">' + leechers + '</td>' +
+            '</tr>'
+        ));
+
+    // todo: trigger table sort?
+};
+Mgt.results.sort = function (columnNumber) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchCount = 0;
+    table = $$("#results-table");
+    switching = true;
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.find("tr");
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].find("td")[columnNumber];
+            y = rows[i + 1].find("td")[columnNumber];
+            if (dir === "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch= true;
+                    break;
+                }
+            } else if (dir === "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch= true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchCount ++;
+        } else {
+            if (switchCount === 0 && dir === "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+};
+
+// Scraper
+Mgt.Scraper = function (type) {
+    this.scrape = function () {
+        switch (type) {
+            case 'tpb':
+                return Mgt.scrapeStrategies.tpb;
+        }
+    }();
+};
+Mgt.Scraper.prototype.scrapeMagnets = function (url, searchQuery) {
+    this.scrape(url, searchQuery);
+};
+
+// Scraping strategies
+Mgt.scrapeStrategies = {};
+Mgt.scrapeStrategies.tpb = function (url, searchQuery) {
+    return request(url + '/search/' + encodeURI(searchQuery) + '/0/99/0', function (error, response, body) {
         if (error) {
-            console.log('Proxy ' + proxy + 'returned an error response (' + error + ')');
-            invalidResponse(searchQuery);
+            console.warn('Source ' + url + 'returned an error response (' + error + ')');
             return;
         }
 
-        console.log('Proxy ' + proxy + ' responded. Validating response...');
-
+        console.info('Source ' + url + ' responded. Validating response...');
         var $ = cheerio.load(body);
         var resultsTrList = $('#searchResult').find('tbody > tr');
         if (!resultsTrList.length) {
-            console.log('Response from ' + proxy + ' seems to not be valid. Ignoring response.');
-            invalidResponse(searchQuery);
+            console.warn('Response from ' + url + ' seems to not be valid. Ignoring response.');
             return;
         }
 
-        // Prevent requests race condition
-        if (++validatedResponses > 1) {
-            return;
-        }
+        console.info('Response from ' + url + ' validated. Loading results...');
 
-        console.log('Response from ' + proxy + ' validated. Loading results...');
-
-        closeAllConnections();
-        magneto.preloading.done();
         resultsTrList.each(function (i, el) {
             var tr = $(el);
-
             var magnet = tr.find('a[href^="magnet"]').attr('href');
             var name = tr.find('.detName > a').text();
             var uploadedBy = tr.find('a.detDesc').text();
@@ -210,12 +256,19 @@ function requestListOfMagnets(proxy, connectionNumber, searchQuery) {
             var seeders = tr.find('td:nth-last-child(2)').text();
             var leechers = tr.find('td:last-child').text();
 
-            magneto.preloading.loadResult(magnet, name, uploaded, size, uploadedBy, seeders, leechers);
+            Mgt.results.add(magnet, name, uploaded, size, uploadedBy, seeders, leechers);
         });
     });
-}
+};
 
-function copyToClipboard(magnet, name) {
-    clipboard.set(magnet, 'text');
-    myApp.alert('Magnet link for "' + name + '" copied to your system clipboard', 'Great success!');
-}
+// Search
+Mgt.search = function (searchQuery) {
+    // Reset preloading
+    Mgt.preloader.isDone = false;
+    Mgt.results.added = [];
+
+    Mgt.preloader.log('Searching magnets...');
+    for (var i = 0; i < Mgt.sources.length; i++) {
+        new Mgt.Scraper(Mgt.sources[i].type).scrapeMagnets(Mgt.sources[i].url, searchQuery);
+    }
+};
