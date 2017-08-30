@@ -11,8 +11,11 @@
   "author": "Mitxel Moriana",
   "license": "ISC",
   "dependencies": {
-    "cheerio": "latest",
-    "request": "latest"
+    "cheerio": "^1.0.0-rc.2",
+    "magnet-uri": "^5.1.7",
+    "request": "latest",
+    "underscore": "^1.8.3",
+    "valid-url": "^1.0.9"
   },
   "window": {
     "title": "Magneto App",
