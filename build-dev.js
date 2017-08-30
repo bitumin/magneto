@@ -1,4 +1,5 @@
 var NwBuilder = require('nw-builder');
+// var manifest = require('./src/package.json');
 
 var nw = new NwBuilder({
     files: './src/**/**',

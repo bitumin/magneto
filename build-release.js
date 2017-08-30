@@ -5,6 +5,7 @@ var nw = new NwBuilder({
     files: './src/**/**',
     buildDir: './build/release',
     winIco: './src/magneto.ico',
+    macIcns: './src/magneto.icns',
     platforms: ['linux', 'osx64', 'win'],
     flavor: 'normal',
     version: 'latest'
