@@ -34,6 +34,7 @@
                                 <div class="item-content">
                                     <div class="item-inner">
                                         <div class="item-input">
+                                            <!--suppress XmlDefaultAttributeValue -->
                                             <input type="text" name="search" placeholder="Pirate Search">
                                         </div>
                                     </div>
@@ -78,28 +79,30 @@
         </div>
     </div>
 </script>
-<script type="text/template" id="results-table">
-<div class="content-block-inner results">
+<script type="text/template" id="results-table-template">
     <div class="data-table data-table-init card">
-        <table>
-            <thead>
-                <tr>
-                    <th data-column="1">Magnet</th>
-                    <th data-column="2" class="label-cell sortable-cell">Name</th>
-                    <th data-column="3">Uploaded</th>
-                    <th data-column="4">Size</th>
-                    <th data-column="5" class="sortable-cell">Uploaded by</th>
-                    <th data-column="6" class="numeric-cell sortable-cell sortable-active">Seeders</th>
-                    <th data-column="7" class="numeric-cell sortable-cell">Leechers</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="card-content">
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>Magnet</th>
+                        <th class="label-cell sortable-cell">Name</th>
+                        <th class="sortable-cell">Uploaded</th>
+                        <th class="sortable-cell">Size</th>
+                        <th class="sortable-cell">Uploaded by</th>
+                        <th class="numeric-cell sortable-cell" data-sort-method="number" data-sort-default>Seeders</th>
+                        <th class="numeric-cell sortable-cell" data-sort-method="number">Leechers</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
-</div>
 </script>
 <!--/templates-->
 <script src="bower_components/framework7/dist/js/framework7.min.js"></script>
+<script src="node_modules/tablesort/dist/tablesort.min.js"></script>
+<script src="node_modules/tablesort/dist/sorts/tablesort.number.min.js"></script>
 <script src="index.js"></script>
 </body>
 </html>

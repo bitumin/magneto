@@ -106,20 +106,13 @@ Mgt.preloader.isDone = false;
 Mgt.preloader.done = function () {
     $$('.preloading-block').hide();
     $$('.content-block.results')
-        .append($$('#results-table').html())
+        .append($$('#results-table-template').html())
         .on('click', 'a.magnet', function () {
             clipboard.set($$(this).data('magnet'), 'text');
             myApp.alert('Magnet link for "' + $$(this).data('name') + '" copied to your system clipboard', 'Great success!');
-        })
-        .on('click', 'th.sortable-cell', function () {
-            // Switch active class
-            var th = $$(this);
-            th.siblings().removeClass('sortable-active');
-            th.addClass('sortable-active');
-            // Sort
-            var column = th.data('column');
-            Mgt.results.sort(column);
         });
+    console.log($$('#results-table'));
+    Mgt.results.table = new Tablesort($$('#results-table')[0], {descending: true});
 };
 
 // Results handlers
@@ -156,7 +149,7 @@ Mgt.results.add = function (magnet, name, uploaded, size, uploadedBy, seeders, l
     // Store magnet xt as added result
     Mgt.results.added.push(magnet.xt);
 
-    $$('.content-block-inner.results')
+    $$('#results-table')
         .find('tbody')
         .append($$(
             '<tr>' +
@@ -174,43 +167,7 @@ Mgt.results.add = function (magnet, name, uploaded, size, uploadedBy, seeders, l
             '</tr>'
         ));
 
-    // todo: trigger table sort?
-};
-Mgt.results.sort = function (columnNumber) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchCount = 0;
-    table = $$("#results-table");
-    switching = true;
-    dir = "asc";
-    while (switching) {
-        switching = false;
-        rows = table.find("tr");
-        for (i = 1; i < (rows.length - 1); i++) {
-            shouldSwitch = false;
-            x = rows[i].find("td")[columnNumber];
-            y = rows[i + 1].find("td")[columnNumber];
-            if (dir === "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch= true;
-                    break;
-                }
-            } else if (dir === "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    shouldSwitch= true;
-                    break;
-                }
-            }
-        }
-        if (shouldSwitch) {
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-            switchCount ++;
-        } else {
-            if (switchCount === 0 && dir === "asc") {
-                dir = "desc";
-                switching = true;
-            }
-        }
-    }
+    Mgt.results.table.refresh();
 };
 
 // Scraper
