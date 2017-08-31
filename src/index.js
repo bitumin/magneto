@@ -216,8 +216,16 @@ Mgt.scrapeStrategies.tpb = function (url, searchQuery) {
             var name = tr.find('.detName > a').text();
             var uploadedBy = tr.find('a.detDesc').text();
             var description = tr.find('font.detDesc').clone().children().remove().end().text().split(',');
-            var uploaded = typeof description[0] !== 'undefined' ? description[0].replace('Uploaded ', '') : '';
-            var size = typeof description[1] !== 'undefined' ? description[1].replace('Size ', '') : '';
+            var uploaded = '';
+            var size = '';
+            if (Array.isArray(description) && description.length) {
+                if (typeof description[0] !== 'undefined') {
+                    uploaded = description[0].replace('Uploaded ', '');
+                }
+                if (typeof description[1] !== 'undefined') {
+                    size = description[1].replace('Size ', '');
+                }
+            }
             var seeders = tr.find('td:nth-last-child(2)').text();
             var leechers = tr.find('td:last-child').text();
 
