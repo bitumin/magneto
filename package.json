@@ -1,6 +1,6 @@
 {
   "name": "magneto",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "",
   "scripts": {
     "release": "cd src && bower install && npm install && cd .. && node build-release.js && bash package.sh",

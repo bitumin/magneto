@@ -15,7 +15,11 @@ var mainView = myApp.addView('.view-main', {
 });
 
 // Search click handler
-$$('.form-to-data').on('click', function () {
+var doSearch = function (e) {
+    if (e.type === 'keyup' && e.keyCode !== 13) {
+        return;
+    }
+
     // Fetch user search query
     var formData = myApp.formToData('#my-form');
     var searchQuery = formData.search;
@@ -25,7 +29,9 @@ $$('.form-to-data').on('click', function () {
 
     // check if we already have fetched a list of tpb proxies
     Mgt.search(searchQuery);
-});
+};
+$$('.form-to-data').on('click', doSearch);
+$$("input[name=search]").on('keyup', doSearch);
 
 // App namespace
 var Mgt = {};
@@ -206,8 +212,8 @@ Mgt.scrapeStrategies.tpb = function (url, searchQuery) {
             var name = tr.find('.detName > a').text();
             var uploadedBy = tr.find('a.detDesc').text();
             var description = tr.find('font.detDesc').clone().children().remove().end().text().split(',');
-            var uploaded = description[0].replace('Uploaded ', '');
-            var size = description[1].replace('Size ', '');
+            var uploaded = typeof description[0] !== 'undefined' ? description[0].replace('Uploaded ', '') : '';
+            var size = typeof description[1] !== 'undefined' ? description[1].replace('Size ', '') : '';
             var seeders = tr.find('td:nth-last-child(2)').text();
             var leechers = tr.find('td:last-child').text();
 

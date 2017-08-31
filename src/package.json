@@ -1,7 +1,7 @@
 {
   "name": "magneto",
-  "version": "1.0.0",
-  "description": "Magneto App",
+  "version": "1.1.1",
+  "description": "Minimal app to quickly attract magnet links",
   "main": "index.html",
   "keywords": [
     "magnet",
@@ -19,12 +19,12 @@
     "valid-url": "^1.0.9"
   },
   "window": {
-    "title": "Magneto App",
+    "title": "Magneto",
     "icon": "magneto.png",
     "position": "center",
-    "min_width": 800,
-    "min_height": 600,
-    "width": 800,
-    "height": 600
+    "min_width": 1080,
+    "min_height": 620,
+    "width": 1080,
+    "height": 620
   }
 }

@@ -2,7 +2,7 @@
 
 ## Description
 
-Minimal app to quickly "attract" magnet links
+Minimal app to quickly attract magnet links
 
 ## Credits
 
