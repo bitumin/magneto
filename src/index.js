@@ -20,6 +20,10 @@ var doSearch = function (e) {
         return;
     }
 
+    // Prevents triggering multiple search by spamming the enter key
+    $$('.form-to-data').blur();
+    $$("input[name=search]").blur();
+
     // Fetch user search query
     var formData = myApp.formToData('#my-form');
     var searchQuery = formData.search;
