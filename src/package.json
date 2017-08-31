@@ -13,7 +13,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "magnet-uri": "^5.1.7",
-    "request": "latest",
+    "request": "^2.81.0",
     "tablesort": "^5.0.1",
     "underscore": "^1.8.3",
     "valid-url": "^1.0.9"

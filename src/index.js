@@ -104,10 +104,11 @@ Mgt.preloader.fatal = function (txt) {
 };
 Mgt.preloader.isDone = false;
 Mgt.preloader.done = function () {
+    Mgt.preloader.isDone = true;
     $$('.preloading-block').hide();
     $$('.content-block.results')
         .append($$('#results-table-template').html())
-        .on('click', 'a.magnet', function () {
+        .on('click', 'a.magnet-link', function () {
             clipboard.set($$(this).data('magnet'), 'text');
             myApp.alert('Magnet link for "' + $$(this).data('name') + '" copied to your system clipboard', 'Great success!');
         });
@@ -127,7 +128,7 @@ Mgt.results.add = function (magnet, name, uploaded, size, uploadedBy, seeders, l
     try {
         var parsedMagnet = magnetUri.decode(magnet);
     } catch (err) {
-        console.warn('Error while trying to decode magnet link information:' + magnet);
+        console.warn('Unable to decode magnet link:' + magnet);
         return;
     }
 
@@ -139,22 +140,19 @@ Mgt.results.add = function (magnet, name, uploaded, size, uploadedBy, seeders, l
     if (_.contains(Mgt.results.added, parsedMagnet.xt)) {
         return;
     }
+    Mgt.results.added.push(parsedMagnet.xt);
 
     // Finish preloading process
     if (!Mgt.preloader.isDone) {
         Mgt.preloader.done();
-        Mgt.preloader.isDone = true;
     }
-
-    // Store magnet xt as added result
-    Mgt.results.added.push(magnet.xt);
 
     $$('#results-table')
         .find('tbody')
         .append($$(
             '<tr>' +
             '    <td>' +
-            '        <a class="magnet" href="#" data-magnet="' + magnet + '" data-name="' + name + '">' +
+            '        <a class="magnet-link" href="#" data-magnet="' + magnet + '" data-name="' + name + '">' +
             '            <i class="fa fa-magnet"></i>' +
             '        </a>' +
             '    </td>' +
